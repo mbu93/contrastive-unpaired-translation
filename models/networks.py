@@ -1,3 +1,4 @@
+from typing import List, Tuple, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -74,7 +75,7 @@ class Upsample(nn.Module):
     def __init__(self, channels, pad_type='repl', filt_size=4, stride=2):
         super(Upsample, self).__init__()
         self.filt_size = filt_size
-        self.filt_odd = np.mod(filt_size, 2) == 1
+        self.filt_odd = bool(np.mod(filt_size, 2) == 1)
         self.pad_size = int((filt_size - 1) / 2)
         self.stride = stride
         self.off = int((self.stride - 1) / 2.)
@@ -984,7 +985,9 @@ class ResnetGenerator(nn.Module):
 
         self.model = nn.Sequential(*model)
 
-    def forward(self, input, layers=[], encode_only=False):
+    def forward(self, input, layers: List[int], encode_only: bool = False) -> Union[List[torch.Tensor], Tuple[torch.Tensor, List[torch.Tensor]], torch.Tensor]:
+        if layers is None:
+            layers = []
         if -1 in layers:
             layers.append(len(self.model))
         if len(layers) > 0:
